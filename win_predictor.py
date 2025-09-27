@@ -1,14 +1,56 @@
 import pandas as pd
 import numpy as np
 
+INJURY_ADJUSTMENTS = {
+    'CIN': [[2, 100, -4]], # Joe Burrow injury (9.5 proj to 5.5 est)
+}
+
+HOME_TEAM_ADJUSTMENTS = {
+    # Best home advantages
+    'KC': 1,
+    'SEA': 1,
+    'PHI': 0.5,
+    'GB': 0.5,
+    'DEN': 0.5,
+    'BUF': 0.5,
+
+    # Bad home advantages
+    'JAX': -0.5,
+    'LV': -0.5,
+    'LAR': -0.5,
+    'CAR': -0.5
+}
+
+BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS = {
+    'NYG': 1,
+    'HOU': 1,
+    'MIA': 1,
+    'CLE': 1,
+    'NE': 0.5,
+    'NYJ': 0.5,
+    'DAL': 0.5,
+    'ATL': 0.5,
+
+    'TEN': -0.5,
+    'NO': -0.5,
+}
+
 class WinPredictor:
-    def __init__(self, csv_path, scale=5.9, home_field_advantage=1.0):
+    def __init__(self, csv_path, scale=5.9, home_field_advantage=1.0, current_weight=0.3):
         self.data = pd.read_csv(csv_path)
-        self.team_wins = dict(zip(self.data["abbreviation"], self.data["projected_wins"]))
+        self.projected_wins = dict(zip(self.data["abbreviation"], self.data["projected_wins"]))
+        self.current_wins = dict(zip(self.data["abbreviation"], self.data["wins_after_week_3"]))
+
+        self.team_wins = {
+            team: (current_weight * self.current_wins[team] +
+                (1 - current_weight) * self.projected_wins[team])
+            for team in self.projected_wins
+        }
+
         self.scale = scale
         self.home_field_advantage = home_field_advantage
 
-    def calculate_win_probability(self, team1, team2, home_team=None):
+    def calculate_win_probability(self, team1, team2, week_number, home_team=None):
         """
         Calculate probability of team1 winning against team2 using a scaled logistic model.
 
@@ -28,9 +70,24 @@ class WinPredictor:
 
         # Home field advantage adjustment
         if home_team == team1:
-            wins1 += self.home_field_advantage
+            wins1 += self.home_field_advantage + HOME_TEAM_ADJUSTMENTS.get(team1, 0)
         elif home_team == team2:
-            wins2 += self.home_field_advantage
+            wins2 += self.home_field_advantage + HOME_TEAM_ADJUSTMENTS.get(team2, 0)
+
+        # Injury adjustment
+        if team1 in INJURY_ADJUSTMENTS:
+            for start_week, end_week, adjustment in INJURY_ADJUSTMENTS[team1]:
+                if start_week <= week_number <= end_week:
+                    wins1 += adjustment
+
+        if team2 in INJURY_ADJUSTMENTS:
+            for start_week, end_week, adjustment in INJURY_ADJUSTMENTS[team2]:
+                if start_week <= week_number <= end_week:
+                    wins2 += adjustment
+
+        # Riskiness adjustment for potential upsets
+        wins1 += BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS.get(team1, 0)
+        wins2 += BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS.get(team2,0)
 
         # Scaled logistic function
         diff = (wins1 - wins2) / self.scale
@@ -68,7 +125,7 @@ class NFLGamePredictor:
             away = row["away_team"]
 
             # Compute probability that home team wins
-            prob_home = self.predictor.calculate_win_probability(home, away, home_team=home)
+            prob_home = self.predictor.calculate_win_probability(home, away, week, home_team=home)
             prob_away = 1 - prob_home
 
             rows.append({
