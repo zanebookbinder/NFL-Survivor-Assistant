@@ -24,7 +24,11 @@ SECOND_CHANCE_WEEK_START = 6
 class NFLSurvivorPickerMonteCarlo:
     def __init__(self, simulations=NUM_SIMULATIONS):
         self.simulations = simulations
-        self.current_week = max(ALREADY_CHOSEN_TEAMS.keys()) + 1 if ALREADY_CHOSEN_TEAMS else SECOND_CHANCE_WEEK_START
+        self.current_week = (
+            max(ALREADY_CHOSEN_TEAMS.keys()) + 1
+            if ALREADY_CHOSEN_TEAMS
+            else SECOND_CHANCE_WEEK_START
+        )
 
         game_predictor = NFLGamePredictor(
             self.current_week, SCHEDULE_CSV_PATH, PROJECTED_WIN_CSV_PATH
@@ -69,10 +73,10 @@ class NFLSurvivorPickerMonteCarlo:
                     best_score = score
                 if len(top_paths) > 5000:
                     top_paths = set(sorted(top_paths, key=lambda x: -x[0])[:100])
-        
+
         # After all simulations, get top 100
         top_paths = sorted(top_paths, key=lambda x: -x[0])[:100]
-        
+
         result = self.save_results(weeks, top_paths)
         return result
 
@@ -149,7 +153,7 @@ class NFLSurvivorPickerMonteCarlo:
             best_path, columns=["week", "pick", "opponent", "win_prob"]
         )
 
-        week_folder = f"data/{'second_chance/' if SECOND_CHANCE_WEEK_START > 0 else ''}week{self.current_week}/{str(best_score).replace('.', '')[1:8]}"
+        week_folder = f"data/{'second_chance/' if SECOND_CHANCE_WEEK_START > 0 else 'first_chance/'}week{self.current_week}/{str(best_score).replace('.', '')[1:8]}"
         os.makedirs(week_folder, exist_ok=True)
         output_csv_path = f"{week_folder}/picks.csv"
         result.to_csv(output_csv_path, index=False)
