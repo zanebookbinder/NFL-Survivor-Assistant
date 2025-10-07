@@ -1,98 +1,134 @@
 import pandas as pd
 import numpy as np
-
-INJURY_ADJUSTMENTS = {
-    'CIN': [[2, 100, -4]], # Joe Burrow injury (9.5 proj to 5.5 est)
-}
-
-HOME_TEAM_ADJUSTMENTS = {
-    # Best home advantages
-    'KC': 1,
-    'SEA': 1,
-    'PHI': 0.5,
-    'GB': 0.5,
-    'DEN': 0.5,
-    'BUF': 0.5,
-
-    # Bad home advantages
-    'JAX': -0.5,
-    'LV': -0.5,
-    'LAR': -0.5,
-    'CAR': -0.5
-}
-
-BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS = {
-    'NYG': 1,
-    'HOU': 1,
-    'MIA': 1,
-    'CLE': 1,
-    'NE': 0.5,
-    'NYJ': 0.5,
-    'DAL': 0.5,
-    'ATL': 0.5,
-
-    'TEN': -0.5,
-    'NO': -0.5,
-}
+from win_predictor_adjustments_helper import \
+    (HOME_TEAM_ADJUSTMENTS, 
+     INJURY_ADJUSTMENTS,
+     BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS,
+     BYE_WEEK_ADJUSTMENT)
 
 class WinPredictor:
-    def __init__(self, csv_path, scale=5.9, home_field_advantage=1.0, current_weight=0.3):
+    def __init__(
+        self,
+        csv_path,
+        weeks_played,
+        scale=5.9,
+        home_field_advantage=1.0,
+    ):
         self.data = pd.read_csv(csv_path)
-        self.projected_wins = dict(zip(self.data["abbreviation"], self.data["projected_wins"]))
-        self.current_wins = dict(zip(self.data["abbreviation"], self.data["wins_after_week_3"]))
+        self.projected_wins = dict(
+            zip(self.data["abbreviation"], self.data["projected_wins"])
+        )
+        self.current_wins = dict(
+            zip(self.data["abbreviation"], self.data["current_wins"])
+        )
 
+        current_week_weight = weeks_played / 18
         self.team_wins = {
-            team: (current_weight * self.current_wins[team] +
-                (1 - current_weight) * self.projected_wins[team])
+            team: (
+                (self.current_wins[team] * current_week_weight)
+                + (self.projected_wins[team] * (1 - current_week_weight))
+            )
             for team in self.projected_wins
         }
 
         self.scale = scale
         self.home_field_advantage = home_field_advantage
+        self.team_bye_week = self.create_bye_week_map()
 
-    def calculate_win_probability(self, team1, team2, week_number, home_team=None):
+    def create_bye_week_map(self, schedule_csv="data/nfl_schedule.csv"):
+        schedule = pd.read_csv(schedule_csv)
+        teams = set(schedule["home_team"]).union(set(schedule["away_team"]))
+        weeks = set(schedule["week"])
+        bye_week_map = {}
+        for team in teams:
+            played_weeks = set(
+                schedule.loc[
+                    (schedule["home_team"] == team) | (schedule["away_team"] == team),
+                    "week",
+                ]
+            )
+            bye_weeks = weeks - played_weeks
+
+            if len(bye_weeks) > 1 or bye_weeks == set():
+                print(f"Warning: Team {team} has multiple bye weeks: {bye_weeks}")
+                raise ValueError(
+                    "Each team should have only one bye week in a standard NFL season."
+                )
+
+            bye_week_map[team] = list(bye_weeks)[0] if bye_weeks else None
+        return bye_week_map
+
+    def calculate_win_probability(self, home_team, away_team, week_number):
         """
-        Calculate probability of team1 winning against team2 using a scaled logistic model.
+        Calculate probability of home_team winning against away_team using a scaled logistic model.
 
         Args:
-            team1 (str): First team name
-            team2 (str): Second team name
-            home_team (str, optional): Team that is playing at home (team1 or team2)
+            home_team (str): Home team name
+            away_team (str): Away team name
+            week_number (int): Current week number
 
         Returns:
-            float: Probability (0-1) that team1 wins.
+            float: Probability (0-1) that home_team wins.
         """
-        if team1 not in self.team_wins or team2 not in self.team_wins:
+        if home_team not in self.team_wins or away_team not in self.team_wins:
             raise ValueError("Both teams must exist in the dataset")
 
-        wins1 = self.team_wins[team1]
-        wins2 = self.team_wins[team2]
+        home_score = self.team_wins[home_team]
+        away_score = self.team_wins[away_team]
+
+        home_wins_preadjustment = home_score
+        away_wins_preadjustment = away_score
 
         # Home field advantage adjustment
-        if home_team == team1:
-            wins1 += self.home_field_advantage + HOME_TEAM_ADJUSTMENTS.get(team1, 0)
-        elif home_team == team2:
-            wins2 += self.home_field_advantage + HOME_TEAM_ADJUSTMENTS.get(team2, 0)
+        home_score += self.home_field_advantage + HOME_TEAM_ADJUSTMENTS.get(
+            home_team, 0
+        )
 
         # Injury adjustment
-        if team1 in INJURY_ADJUSTMENTS:
-            for start_week, end_week, adjustment in INJURY_ADJUSTMENTS[team1]:
-                if start_week <= week_number <= end_week:
-                    wins1 += adjustment
+        if home_team in INJURY_ADJUSTMENTS:
+            for start_week, end_week, adjustment in INJURY_ADJUSTMENTS[home_team]:
+                if start_week <= week_number and week_number <= end_week:
+                    home_score += adjustment
 
-        if team2 in INJURY_ADJUSTMENTS:
-            for start_week, end_week, adjustment in INJURY_ADJUSTMENTS[team2]:
-                if start_week <= week_number <= end_week:
-                    wins2 += adjustment
+        if away_team in INJURY_ADJUSTMENTS:
+            for start_week, end_week, adjustment in INJURY_ADJUSTMENTS[away_team]:
+                if start_week <= week_number and week_number <= end_week:
+                    away_score += adjustment
+
+        # Bye week adjustment
+        if self.team_bye_week.get(home_team) == week_number - 1:
+            home_score += BYE_WEEK_ADJUSTMENT
+        if self.team_bye_week.get(away_team) == week_number - 1:
+            away_score += BYE_WEEK_ADJUSTMENT
 
         # Riskiness adjustment for potential upsets
-        wins1 += BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS.get(team1, 0)
-        wins2 += BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS.get(team2,0)
+        if home_score <= away_score:
+            home_score += BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS.get(home_team, 0)
+        else:
+            away_score += BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS.get(away_team, 0)
 
         # Scaled logistic function
-        diff = (wins1 - wins2) / self.scale
-        prob_team1 = 1 / (1 + np.exp(-diff))
-        return prob_team1
+        diff = (home_score - away_score) / self.scale
+        home_prob = 1 / (1 + np.exp(-diff))
+
+        return ({
+            "week": week_number,
+            "home_team": home_team,
+            "away_team": away_team,
+            "home_win_prob": round(home_prob, 4),
+            "away_win_prob": round(1 - home_prob, 4),
+        }, 
+        {
+            "week": week_number,
+            "home_team": home_team,
+            "away_team": away_team,
+            "home_win_prob": round(home_prob, 4),
+            "away_win_prob": round(1 - home_prob, 4),
+            "home_score": round(home_score, 2),
+            "away_score": round(away_score, 2),
+            "home_preadjustment": round(home_wins_preadjustment, 2),
+            "away_preadjustment": round(away_wins_preadjustment, 2)
+        })
 
     def get_probability_table(self, min_diff=-5, max_diff=5):
         """
@@ -113,32 +149,46 @@ class WinPredictor:
 
 
 class NFLGamePredictor:
-    def __init__(self, schedule_csv='data/nfl_schedule.csv', wins_csv='data/nfl_projected_wins.csv', scale=3.5, home_field_advantage=0.5):
+    def __init__(
+        self,
+        weeks_played,
+        schedule_csv="data/nfl_schedule.csv",
+        wins_csv="data/nfl_projected_wins.csv",
+        full_calc_path_csv = "data/nfl_schedule_with_probs_fullcalcs.csv",
+        scale=3.5,
+        home_field_advantage=0.5,
+    ):
+        self.full_calc_path_csv = full_calc_path_csv
         self.schedule = pd.read_csv(schedule_csv)
-        self.predictor = WinPredictor(wins_csv, scale, home_field_advantage)
+        self.predictor = WinPredictor(
+            wins_csv, weeks_played, scale, home_field_advantage
+        )
 
     def add_win_probabilities(self, csv_file_path=None):
         rows = []
+        calc_rows = []
         for _, row in self.schedule.iterrows():
             week = row["week"]
             home = row["home_team"]
             away = row["away_team"]
 
             # Compute probability that home team wins
-            prob_home = self.predictor.calculate_win_probability(home, away, week, home_team=home)
-            prob_away = 1 - prob_home
+            result_dict, result_dict_with_cals = (
+                self.predictor.calculate_win_probability(
+                    home, away, week
+                )
+            )
 
-            rows.append({
-                "week": week,
-                "home_team": home,
-                "away_team": away,
-                "home_win_prob": round(prob_home, 3),
-                "away_win_prob": round(prob_away, 3)
-            })
+            rows.append(result_dict)
+            calc_rows.append(result_dict_with_cals)
 
         result = pd.DataFrame(rows)
+        calc_result = pd.DataFrame(calc_rows)
 
         if csv_file_path:
             result.to_csv(csv_file_path, index=False)
-        else:
-           return result
+        calc_result.to_csv(self.full_calc_path_csv, index=False)
+        return result
+
+# n = NFLGamePredictor(4)
+# n.add_win_probabilities()
