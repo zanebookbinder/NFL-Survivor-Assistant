@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
-import concurrent.futures
 from win_predictor import NFLGamePredictor
+from datetime import datetime
 
 SCHEDULE_CSV_PATH = "data/nfl_schedule.csv"
 SCHEDULE_WITH_PROBABILITIES_PATH = "data/nfl_schedule_with_probs.csv"
@@ -10,7 +10,7 @@ PROJECTED_WIN_CSV_PATH = "data/nfl_projected_wins.csv"
 MC_PICKS_OUTPUT_CSV_PREFIX = "nfl_survivor_picks_mc"
 
 ALREADY_CHOSEN_TEAMS = {
-    # 6: [["ARI"], [0.7119], ["TEN"]]
+    6: [["GB"], [1.0], ["CIN"]]
 }
 
 CHOOSE_THIS_WEEK = {
@@ -20,18 +20,17 @@ CHOOSE_THIS_WEEK = {
 NUM_SIMULATIONS = 1_000_000
 SECOND_CHANCE_WEEK_START = 6
 
-
 class NFLSurvivorPickerMonteCarlo:
     def __init__(self, simulations=NUM_SIMULATIONS):
         self.simulations = simulations
-        self.current_week = (
+        self.current_prediction_week = (
             max(ALREADY_CHOSEN_TEAMS.keys()) + 1
             if ALREADY_CHOSEN_TEAMS
-            else SECOND_CHANCE_WEEK_START
+            else max(SECOND_CHANCE_WEEK_START, 1)
         )
 
         game_predictor = NFLGamePredictor(
-            self.current_week, SCHEDULE_CSV_PATH, PROJECTED_WIN_CSV_PATH
+            self.current_prediction_week, SCHEDULE_CSV_PATH, PROJECTED_WIN_CSV_PATH
         )
         self.games_with_probs = game_predictor.add_win_probabilities(
             SCHEDULE_WITH_PROBABILITIES_PATH
@@ -55,7 +54,7 @@ class NFLSurvivorPickerMonteCarlo:
 
         for sim in range(self.simulations):
             if sim and not sim % int(self.simulations / 10):
-                print(f"After {sim} simulations, best probability is: {best_score}")
+                print(f"After {sim} simulations, best probability is: {round(best_score * 100, 5)}%")
 
             path, score = self.run_simulation(
                 best_score if best_score != float("-inf") else 0,
@@ -132,7 +131,9 @@ class NFLSurvivorPickerMonteCarlo:
                 )
                 week_team_counts[week][team] = [old_count + 1, opponent, prob]
         # Output formatted results
-        output_str = f"Top {len(top_paths)} Paths:\n"
+        
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        output_str = f"Top {len(top_paths)} Paths (generated at {timestamp}):\n"
         for week in weeks:
             total = sum(w[0] for w in week_team_counts[week].values())
             week_str = f"Week {week}: "
@@ -153,7 +154,7 @@ class NFLSurvivorPickerMonteCarlo:
             best_path, columns=["week", "pick", "opponent", "win_prob"]
         )
 
-        week_folder = f"data/{'second_chance/' if SECOND_CHANCE_WEEK_START > 0 else 'first_chance/'}week{self.current_week}/{str(best_score).replace('.', '')[1:8]}"
+        week_folder = f"data/{'second_chance/' if SECOND_CHANCE_WEEK_START > 0 else 'first_chance/'}week{self.current_prediction_week}/{str(best_score).replace('.', '')[1:8]}"
         os.makedirs(week_folder, exist_ok=True)
         output_csv_path = f"{week_folder}/picks.csv"
         result.to_csv(output_csv_path, index=False)
@@ -175,11 +176,11 @@ class NFLSurvivorPickerMonteCarlo:
             else:
                 teams, probs, opponents = [], [], []
                 for _, row in week_games.iterrows():
-                    if row["home_win_prob"] > 0.60:
+                    if row["home_win_prob"] > 0.55:
                         teams.append(row["home_team"])
                         probs.append(row["home_win_prob"])
                         opponents.append(row["away_team"])
-                    if row["away_win_prob"] > 0.60:
+                    if row["away_win_prob"] > 0.55:
                         teams.append(row["away_team"])
                         probs.append(row["away_win_prob"])
                         opponents.append(row.home_team)

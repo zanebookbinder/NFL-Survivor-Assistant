@@ -1,28 +1,49 @@
 # WEEKLY - NEED TO UPDATE
 INJURY_ADJUSTMENTS = {
     # Season-long injuries
-    "CIN": [[2, 100, -3.5]],  # Joe Burrow injury (9.5 proj to 6)
+    "CIN": [[2, 100, -3.5]],  # Joe Burrow injury (9.5 projected wins to 6)
     "ARI": [[3, 100, -0.25]],  # James Conner injury
-    "SF": [[3, 100, -0.5]],  # Nick Bosa injury
-    "NYG": [[4, 100, -0.5]],  # Nabers injury
+    "SF": [[3, 100, -0.75]],  # Nick Bosa injury + Fred Warner injury
+    "NYG": [[4, 100, -0.75]],  # Nabers injury
+    "MIA": [[4, 100, -0.5]],  # Tyreek Hill
 
     # Temporary injuries (UPDATE THE END WEEKS)
     "DAL": [[3, 6, -0.75]],  # CeeDee Lamb injury
-    "BAL": [[4, 6, -4.0]],  # Lamar Jackson injury
+    "BAL": [[4, 7, -4.0]],  # Lamar Jackson injury
+	"LAR": [[7, 8, -0.75]],  # Puka Nakua  injury
+}
+
+MOMENTUM_ADJUSTMENTS = {
+    "IND": 1,
+	"KC": 1,
+	"NE": 1,
+	"NYG": 1,
+	"TB": 1,
+	
+    "CAR": 0.5,
+	"CHI": 0.5,
+	
+    "BUF": -0.5,
+	"PHI": -0.5,
+	"DEN": -0.5,
+    "BAL": -1,
 }
 
 BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS = {
     "NYG": 1,
-    "HOU": 1,
-    "MIA": 1,
-    "CLE": 1,
-	"DAL": 0.75,
-    "NE": 0.5,
-    "NYJ": 0.5,
-    "ATL": 0.5,
+	"DAL": 1,
+	"CAR": 1,
+    "ATL": 1,
+	
+    "HOU": 0.5,
+    "MIA": 0.5,
+    "CLE": 0.5,
 	
     "TEN": -0.5,
+	"NYJ": -0.5,
 }
+
+TEAMS_TO_AVOID_IN_WEEK_18 = ["BUF", "KC", "PHI", "IND", "TB"]
 
 # STATIC - SHOULD NOT CHANGE
 HOME_TEAM_ADJUSTMENTS = {
