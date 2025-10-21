@@ -12,6 +12,11 @@ The goal is to maximize your chances of surviving each week in an NFL Survivor p
 - The tool tracks which teams have already been picked and ensures no team is picked twice.
 - Results include the top 100 pick paths and team pick percentages for each week.
 
+### WEEKLY UPDATES REQUIRED
+1. Adjustments for injuries, momentum, etc. in helper file
+2. Update already-picked teams in ALREADY_CHOSEN_TEAMS variable (format is [WinningTeam, 1.0, LosingTeam])
+3. Update the wins for each team in nfl_projected_wins.csv (will update that to pull wins automatically soon)
+
 ## How to Update Adjustments
 Adjustments to win probabilities can be made in the `win_predictor_adjustments_helper.py` file. This file allows you to:
 - Change the win probability for specific games or teams.

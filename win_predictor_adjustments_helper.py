@@ -8,9 +8,13 @@ INJURY_ADJUSTMENTS = {
     "MIA": [[4, 100, -0.5]],  # Tyreek Hill
 
     # Temporary injuries (UPDATE THE END WEEKS)
-    "DAL": [[3, 6, -0.75]],  # CeeDee Lamb injury
-    "BAL": [[4, 7, -4.0]],  # Lamar Jackson injury
-	"LAR": [[7, 8, -0.75]],  # Puka Nakua  injury
+	"LAR": [[7, 8, -0.75]],  # Puka Nakua injury
+	"TB": [[7, 8, -0.5]],  # Mike Evans injury
+	"WAS": [[7, 8, -2.5]],  # Jayden Daniels injury
+	
+    # Old injuries
+	#  "DAL": [[3, 6, -0.75]],  # CeeDee Lamb injury
+	# "BAL": [[4, 7, -4.0]],  # Lamar Jackson injury
 }
 
 MOMENTUM_ADJUSTMENTS = {
@@ -18,14 +22,11 @@ MOMENTUM_ADJUSTMENTS = {
 	"KC": 1,
 	"NE": 1,
 	"NYG": 1,
-	"TB": 1,
 	
-    "CAR": 0.5,
-	"CHI": 0.5,
+    "CAR": 0.75,
+	"CHI": 0.75,
+	"DEN": 0.75,
 	
-    "BUF": -0.5,
-	"PHI": -0.5,
-	"DEN": -0.5,
     "BAL": -1,
 }
 
@@ -36,11 +37,12 @@ BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS = {
     "ATL": 1,
 	
     "HOU": 0.5,
-    "MIA": 0.5,
     "CLE": 0.5,
+	"CIN": 0.5,
 	
     "TEN": -0.5,
 	"NYJ": -0.5,
+	"LV": -0.5,
 }
 
 TEAMS_TO_AVOID_IN_WEEK_18 = ["BUF", "KC", "PHI", "IND", "TB"]

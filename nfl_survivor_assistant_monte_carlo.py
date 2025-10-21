@@ -10,7 +10,8 @@ PROJECTED_WIN_CSV_PATH = "data/nfl_projected_wins.csv"
 MC_PICKS_OUTPUT_CSV_PREFIX = "nfl_survivor_picks_mc"
 
 ALREADY_CHOSEN_TEAMS = {
-    6: [["GB"], [1.0], ["CIN"]]
+    6: [["GB"], [1.0], ["CIN"]],
+    7: [["KC"], [1.0], ["LV"]],
 }
 
 CHOOSE_THIS_WEEK = {
