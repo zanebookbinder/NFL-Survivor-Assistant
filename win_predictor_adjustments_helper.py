@@ -21,12 +21,16 @@ MOMENTUM_ADJUSTMENTS = {
     "IND": 1,
 	"KC": 1,
 	"NE": 1,
-	"NYG": 1,
 	
     "CAR": 0.75,
 	"CHI": 0.75,
 	"DEN": 0.75,
 	
+    "NYG": 0.5,
+	
+    "LV": -0.5,
+	"MIA": -0.5,
+	"NYJ": -0.5,
     "BAL": -1,
 }
 
@@ -40,6 +44,7 @@ BAD_TEAM_UPSET_RISKINESS_ADJUSTMENTS = {
     "CLE": 0.5,
 	"CIN": 0.5,
 	
+    "MIA": -0.5,
     "TEN": -0.5,
 	"NYJ": -0.5,
 	"LV": -0.5,

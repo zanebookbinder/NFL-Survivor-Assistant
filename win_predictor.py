@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
+from nfl_win_scraper import NFLWinScraper
 from win_predictor_adjustments_helper import \
     (HOME_TEAM_ADJUSTMENTS, 
      INJURY_ADJUSTMENTS,
@@ -183,12 +184,17 @@ class NFLGamePredictor:
         current_prediction_week,
         schedule_csv="data/nfl_schedule.csv",
         wins_csv="data/nfl_projected_wins.csv",
-        full_calc_path_csv = "data/nfl_schedule_with_probs_fullcalcs.csv",
+        should_scrape_current_wins=True,
+        full_calc_path_csv="data/nfl_schedule_with_probs_fullcalcs.csv",
         scale=3.5,
         home_field_advantage=0.5,
     ):
         self.full_calc_path_csv = full_calc_path_csv
         self.schedule = pd.read_csv(schedule_csv)
+
+        if should_scrape_current_wins:
+            NFLWinScraper.update_wins_column_in_csv(wins_csv)
+            
         self.predictor = WinPredictor(
             wins_csv, current_prediction_week, scale, home_field_advantage
         )
@@ -219,5 +225,5 @@ class NFLGamePredictor:
         calc_result.to_csv(self.full_calc_path_csv, index=False)
         return result
 
-# n = NFLGamePredictor(4)
+# n = NFLGamePredictor(8)
 # n.add_win_probabilities()

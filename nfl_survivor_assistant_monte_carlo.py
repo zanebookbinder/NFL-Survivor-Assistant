@@ -19,6 +19,7 @@ CHOOSE_THIS_WEEK = {
 }
 
 NUM_SIMULATIONS = 1_000_000
+SHOULD_SCRAPE_CURRENT_WINS = True
 SECOND_CHANCE_WEEK_START = 6
 
 class NFLSurvivorPickerMonteCarlo:
@@ -31,7 +32,7 @@ class NFLSurvivorPickerMonteCarlo:
         )
 
         game_predictor = NFLGamePredictor(
-            self.current_prediction_week, SCHEDULE_CSV_PATH, PROJECTED_WIN_CSV_PATH
+            self.current_prediction_week, SCHEDULE_CSV_PATH, PROJECTED_WIN_CSV_PATH, SHOULD_SCRAPE_CURRENT_WINS
         )
         self.games_with_probs = game_predictor.add_win_probabilities(
             SCHEDULE_WITH_PROBABILITIES_PATH
