@@ -17,7 +17,7 @@ class NFLWinScraper:
             return team_wins.get(team, 0)
 
         df["current_wins"] = df["team"].apply(get_wins)
-        df = df.sort_values(by="current_wins", ascending=False)
+        df = df.sort_values(by=["current_wins", "team"], ascending=[False, True])
 
         # Save the updated CSV
         df.to_csv(csv_file_path, index=False)

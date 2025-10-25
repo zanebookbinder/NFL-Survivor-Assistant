@@ -15,7 +15,6 @@ The goal is to maximize your chances of surviving each week in an NFL Survivor p
 ### WEEKLY UPDATES REQUIRED
 1. Adjustments for injuries, momentum, etc. in helper file
 2. Update already-picked teams in ALREADY_CHOSEN_TEAMS variable (format is [WinningTeam, 1.0, LosingTeam])
-3. Update the wins for each team in nfl_projected_wins.csv (will update that to pull wins automatically soon)
 
 ## How to Update Adjustments
 Adjustments to win probabilities can be made in the `win_predictor_adjustments_helper.py` file. This file allows you to:

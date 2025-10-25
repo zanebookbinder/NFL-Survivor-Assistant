@@ -1,13 +1,11 @@
 import pandas as pd
 import numpy as np
 import os
-from win_predictor import NFLGamePredictor
+from win_predictor import NFLWinPredictor
 from datetime import datetime
 
 SCHEDULE_CSV_PATH = "data/nfl_schedule.csv"
-SCHEDULE_WITH_PROBABILITIES_PATH = "data/nfl_schedule_with_probs.csv"
 PROJECTED_WIN_CSV_PATH = "data/nfl_projected_wins.csv"
-MC_PICKS_OUTPUT_CSV_PREFIX = "nfl_survivor_picks_mc"
 
 ALREADY_CHOSEN_TEAMS = {
     6: [["GB"], [1.0], ["CIN"]],
@@ -18,7 +16,7 @@ CHOOSE_THIS_WEEK = {
     # 6: [["ARI"], [0.7119], ["TEN"]]
 }
 
-NUM_SIMULATIONS = 1_000_000
+NUM_SIMULATIONS = 10_000_000
 SHOULD_SCRAPE_CURRENT_WINS = True
 SECOND_CHANCE_WEEK_START = 6
 
@@ -31,15 +29,12 @@ class NFLSurvivorPickerMonteCarlo:
             else max(SECOND_CHANCE_WEEK_START, 1)
         )
 
-        game_predictor = NFLGamePredictor(
-            self.current_prediction_week, SCHEDULE_CSV_PATH, PROJECTED_WIN_CSV_PATH, SHOULD_SCRAPE_CURRENT_WINS
+        game_predictor = NFLWinPredictor(
+            self.current_prediction_week, SHOULD_SCRAPE_CURRENT_WINS
         )
-        self.games_with_probs = game_predictor.add_win_probabilities(
-            SCHEDULE_WITH_PROBABILITIES_PATH
-        )
-        self.total_weeks = len(self.games_with_probs["week"].unique())
+        self.games_with_probs = game_predictor.add_win_probabilities_to_csv()
 
-    def do_monte_carlo_simulations(self, output_csv_path=None):
+    def do_monte_carlo_simulations(self):
         top_paths = set()  # Set of (score, path) tuples
         best_score = float("-inf")
         weeks = [
@@ -178,11 +173,11 @@ class NFLSurvivorPickerMonteCarlo:
             else:
                 teams, probs, opponents = [], [], []
                 for _, row in week_games.iterrows():
-                    if row["home_win_prob"] > 0.55:
+                    if row["home_win_prob"] > 0.6:
                         teams.append(row["home_team"])
                         probs.append(row["home_win_prob"])
                         opponents.append(row["away_team"])
-                    if row["away_win_prob"] > 0.55:
+                    if row["away_win_prob"] > 0.6:
                         teams.append(row["away_team"])
                         probs.append(row["away_win_prob"])
                         opponents.append(row.home_team)
@@ -193,6 +188,6 @@ class NFLSurvivorPickerMonteCarlo:
 
 
 picker = NFLSurvivorPickerMonteCarlo(simulations=NUM_SIMULATIONS)
-survivor_picks = picker.do_monte_carlo_simulations(MC_PICKS_OUTPUT_CSV_PREFIX)
+survivor_picks = picker.do_monte_carlo_simulations()
 
 print(survivor_picks.to_string(index=False))
