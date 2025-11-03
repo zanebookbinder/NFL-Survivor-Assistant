@@ -10,6 +10,12 @@ PROJECTED_WIN_CSV_PATH = "data/nfl_projected_wins.csv"
 ALREADY_CHOSEN_TEAMS = {
     6: [["GB"], [1.0], ["CIN"]],
     7: [["KC"], [1.0], ["LV"]],
+    8: [["IND"], [1.0], ["TEN"]],
+    9: [["LAR"], [1.0], ["NO"]],
+
+    # 12: [["BAL"], [0.8138], ["NYJ"]],
+    # 17: [["DEN"], [1], ["MIN"]],
+    # 18: [["PIT"], [0.6525], ["CLE"]]
 }
 
 CHOOSE_THIS_WEEK = {

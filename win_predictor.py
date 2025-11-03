@@ -5,6 +5,7 @@ from nfl_win_scraper import NFLWinScraper
 from win_predictor_adjustments_helper import (
     HOME_TEAM_ADJUSTMENTS,
     TEAMS_TO_AVOID_IN_WEEK_18,
+    apply_divisional_underdog_adjustment,
     apply_injury_adjustment,
     apply_bye_week_adjustment,
     apply_upset_riskiness_adjustment,
@@ -112,6 +113,9 @@ class NFLWinPredictor:
         # Momentum adjustment
         home_score = apply_momentum_adjustment(home_team, home_score)
         away_score = apply_momentum_adjustment(away_team, away_score)
+
+        # Divisional underdog adjustment
+        home_score, away_score = apply_divisional_underdog_adjustment(home_team, away_team, home_score, away_score)
 
         # Scaled logistic function
         diff = (home_score - away_score) / self.scale
