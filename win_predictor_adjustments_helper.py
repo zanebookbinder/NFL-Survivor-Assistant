@@ -1,43 +1,45 @@
 # WEEKLY - NEED TO UPDATE
 INJURY_ADJUSTMENTS = {
     # Season-long injuries
-    "CIN": [[2, 100, -3.5]],  # Joe Burrow injury (9.5 projected wins to 6)
-    "ARI": [[3, 100, -0.25]],  # James Conner injury
-    "SF": [[3, 100, -0.5], [6, 100, -0.25]],  # Nick Bosa injury + Fred Warner injury
-    "NYG": [[4, 100, -0.75], [8, 100, -0.5]],  # Nabers injury, Skattebo injury
+    "CIN": [[2, 100, -3.5]],  # Joe Burrow (9.5 projected wins to 6)
+    "ARI": [[3, 100, -0.25]],  # James Conner
+    "SF": [[3, 100, -0.5], [6, 100, -0.25]],  # Nick Bosa + Fred Warner
+
+    # DART CONCUSSION INCLUDED HERE
+    "NYG": [[4, 100, -0.75], [8, 100, -0.5], [10, 11, -1.5]],  # Nabers, Skattebo
     "MIA": [[4, 100, -0.5]],  # Tyreek Hill
-    "TB": [[7, 100, -0.5]],  # Mike Evans injury
-    "GB": [[9, 100, -0.25]],  # Tucker Kraft injury
+    "TB": [[7, 100, -0.5]],  # Mike Evans
+    "GB": [[9, 100, -0.25]],  # Tucker Kraft
+    "TEN": [[11, 100, -0.25]],  # Calvin Ridley
+
     # Temporary injuries (UPDATE THE END WEEKS)
-
-    # Old injuries
-    # "DAL": [[3, 6, -0.75]],  # CeeDee Lamb injury
-    # "BAL": [[4, 8, -4.0]],  # Lamar Jackson injury
-    # "LAR": [[7, 8, -0.75]],  # Puka Nakua injury
-    # "WAS": [[7, 8, -2.5]],  # Jayden Daniels injury
-
-    "BAL": [[9, 100, 3]] # Reflecting that BAL is better than their record
+    "WAS": [[10, 13, -2]],  # Jayen Daniels
+    "PIT": [[11, 12, -2.0]],  # Aaron Rodgers
 }
 
 MOMENTUM_ADJUSTMENTS = {
     "NE": 1,
     "DEN": 1,
+    "LAR": 1,
 
-    "LAC": 0.75,
-    "SF": 0.75,
+    "CHI": 0.75,
     "BUF": 0.75,
 
-    "LAR": 0.5,
+    "IND": 0.5,
+    "SEA": 0.5,
+    "JAX": 0.5,
+    "SF": 0.5,
+    "BAL": 0.5,
 
-    "IND": 0.25,
-    "KC": 0.25,
-    "PIT": 0.25,
-    "CAR": 0.25,
-
-    "NYJ": -0.5,
+    "DAL": -0.5,
+    "NO": -0.5,
     "NYG": -0.5,
+    "CIN": -0.5,
+
+    "NYJ": -0.75,
     "LV": -0.75,
-    "NO": -0.75
+    "TEN": -0.75,
+    "WAS": -0.75,
 }
 
 UPSET_RISKINESS_ADJUSTMENTS = {
@@ -45,19 +47,19 @@ UPSET_RISKINESS_ADJUSTMENTS = {
     "CAR": 1,
     "CIN": 1,
     "ATL": 0.75,
-    "HOU": 0.5,
+    "HOU": 0.75,
     "MIA": 0.5,
 
     "CLE": 0,
+    "NO": 0,
 
     "NYJ": -0.5,
     "NYG": -0.5,
-    "NO": -0.75,
     "LV": -0.75,
     "TEN": -0.75,
 }
 
-TEAMS_TO_AVOID_IN_WEEK_18 = ["BUF", "KC", "PHI", "IND", "TB"]
+TEAMS_TO_AVOID_IN_WEEK_18 = ["BUF", "PHI", "IND", "TB", "NE", "LAR"]
 
 # STATIC - SHOULD NOT CHANGE
 HOME_TEAM_ADJUSTMENTS = {

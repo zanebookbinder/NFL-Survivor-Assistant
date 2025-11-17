@@ -57,7 +57,7 @@ class NFLWinScraper:
                 ties_cell = row.find("td", {"data-stat": "ties"})
 
                 if team_cell and wins_cell:
-                    team_name = team_cell.get_text(strip=True)
+                    team_name = team_cell.get_text(strip=True).replace("*", "").replace("+", "")
                     wins = wins_cell.get_text(strip=True)
                     ties = ties_cell.get_text(strip=True)
                     if wins.isdigit():
