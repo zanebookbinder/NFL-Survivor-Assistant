@@ -1,0 +1,8 @@
+Top 12 Paths (generated at 2025-11-17 08:04:52):
+Week 12: DET over NYG (50% of paths, 88% to win), SEA over TEN (33% of paths, 87% to win), NE over CIN (8% of paths, 88% to win), JAX over ARI (8% of paths, 62% to win)
+Week 13: LAC over LV (66% of paths, 86% to win), NE over NYG (16% of paths, 93% to win), SF over CLE (8% of paths, 77% to win), BUF over PIT (8% of paths, 63% to win)
+Week 14: BUF over CIN (83% of paths, 90% to win), TB over NO (8% of paths, 75% to win), CLE over TEN (8% of paths, 67% to win)
+Week 15: SF over TEN (50% of paths, 91% to win), PHI over LV (33% of paths, 92% to win), PIT over MIA (8% of paths, 66% to win), CHI over CLE (8% of paths, 84% to win)
+Week 16: HOU over LV (50% of paths, 80% to win), MIN over NYG (25% of paths, 77% to win), MIA over CIN (8% of paths, 68% to win), PHI over WSH (8% of paths, 78% to win), NE over BAL (8% of paths, 60% to win)
+Week 17: NE over NYJ (58% of paths, 87% to win), PIT over CLE (25% of paths, 70% to win), ARI over CIN (16% of paths, 63% to win)
+Week 18: JAX over TEN (91% of paths, 83% to win), ATL over NO (8% of paths, 62% to win)

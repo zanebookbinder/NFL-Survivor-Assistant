@@ -24,6 +24,7 @@ MOMENTUM_ADJUSTMENTS = {
 
     "CHI": 0.75,
     "BUF": 0.75,
+    "PHI": 0.75,
 
     "IND": 0.5,
     "SEA": 0.5,
