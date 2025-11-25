@@ -3,30 +3,10 @@ import numpy as np
 import os
 from win_predictor import NFLWinPredictor
 from datetime import datetime
+from win_predictor_adjustments_helper import ALREADY_CHOSEN_TEAMS
 
 SCHEDULE_CSV_PATH = "data/nfl_schedule.csv"
 PROJECTED_WIN_CSV_PATH = "data/nfl_projected_wins.csv"
-
-ALREADY_CHOSEN_TEAMS = {
-    6: ["GB", 1.0, "CIN"],
-    7: ["KC", 1.0, "LV"],
-    8: ["IND", 1.0, "TEN"],
-    9: ["LAR", 1.0, "NO"],
-    10: ["DEN", 1.0, "LV"],
-    11: ["BAL", 1.0, "CLE"],
-}
-
-    # TOMMY'S PICKS
-    # 1: [["ARI"], [1.0], [""]],
-    # 2: [["DAL"], [1.0], [""]],
-    # 3: [["KC"], [1.0], [""]],
-    # 4: [["BUF"], [1.0], [""]],
-    # 5: [["MIN"], [1.0], [""]],
-    # 6: [["GB"], [1.0], [""]],
-    # 7: [["NE"], [1.0], [""]],
-    # 8: [["PHI"], [1.0], [""]],
-    # 9: [["LAR"], [1.0], [""]],
-    # 10: [["DET"], [1.0], [""]],
 
 CHOOSE_THIS_WEEK = {
     # 6: ["ARI", 0.7119, "TEN"]
