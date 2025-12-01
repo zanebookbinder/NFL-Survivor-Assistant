@@ -7,7 +7,7 @@ This project is a Monte Carlo simulation tool designed to help players optimize 
 The goal is to maximize your chances of surviving each week in an NFL Survivor pool by making data-driven picks. The tool analyzes all possible pick combinations, taking into account teams already chosen and custom win probability adjustments, to recommend the most optimal paths.
 
 ## How It Works
-- The simulation runs thousands of possible pick paths for the remaining weeks of the NFL season.
+- The simulation runs millions of possible pick paths for the remaining weeks of the NFL season.
 - It uses win probabilities from the schedule and allows for custom adjustments.
 - The tool tracks which teams have already been picked and ensures no team is picked twice.
 - Results include the top 100 pick paths and team pick percentages for each week.

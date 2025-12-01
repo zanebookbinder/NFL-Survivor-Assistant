@@ -1,3 +1,4 @@
+from calendar import week
 import pandas as pd
 import numpy as np
 import os
@@ -29,6 +30,8 @@ class NFLSurvivorPickerMonteCarlo:
             self.current_prediction_week, SHOULD_SCRAPE_CURRENT_WINS
         )
         self.games_with_probs = game_predictor.add_win_probabilities_to_csv()
+        self.full_dfs_counter = 0
+        self.full_dfs_top_paths = set()
 
     def do_monte_carlo_simulations(self):
         top_paths = set()  # Set of (score, path) tuples
@@ -38,16 +41,25 @@ class NFLSurvivorPickerMonteCarlo:
             for x in sorted(self.games_with_probs["week"].unique())
             if x >= self.current_prediction_week
         ]
-        candidates = self.precompute_weekly_candidates(weeks)
+        used_teams = set(team for team, _, _ in ALREADY_CHOSEN_TEAMS.values())
+        candidates = self.precompute_weekly_candidates(weeks, used_teams)
         week_indices = {week: i for i, week in enumerate(weeks)}
         n_weeks = len(weeks)
-        used_teams = set(team for team, _, _ in ALREADY_CHOSEN_TEAMS.values())
         all_teams = np.unique(
             np.concatenate([candidates[w][0] for w in weeks] + [np.array(list(used_teams))])
         )
         team_to_idx = {team: i for i, team in enumerate(all_teams)}
         n_teams = len(all_teams)
-        
+
+        if n_weeks < 6:
+            print("Less than 6 weeks remaining, enumerating all possible paths instead.")
+            self.simulations = 0
+
+            best_score = self.full_dfs(
+                candidates, min(weeks), used_teams, [], 1, best_score=float("-inf")
+            )
+            top_paths = self.full_dfs_top_paths
+            print('Explored ', self.full_dfs_counter, ' paths in full DFS.')
 
         for sim in range(self.simulations):
             if sim and not sim % int(self.simulations / 10):
@@ -124,6 +136,53 @@ class NFLSurvivorPickerMonteCarlo:
             used_mask[team_to_idx[team]] = True
         return path, score
 
+    def full_dfs(
+        self,
+        weekly_candidates,
+        week_idx,
+        picked_teams,
+        path,
+        score,
+        best_score
+    ):
+        if week_idx == 19:
+            self.full_dfs_counter += 1
+            if score > 0:
+                self.full_dfs_top_paths.add((score, tuple(path)))
+                if score > best_score:
+                    best_score = score
+                if len(self.full_dfs_top_paths) > 5000:
+                    self.full_dfs_top_paths = set(sorted(self.full_dfs_top_paths, key=lambda x: -x[0])[:100])
+                
+            return best_score
+
+        teams, opponents, probs = weekly_candidates[week_idx]
+
+        if len(teams) == 0:
+            self.full_dfs_counter += 1
+            return best_score
+
+        # Try each possible team this week
+        for team, opponent, prob in zip(teams, opponents, probs):
+            if team in picked_teams:
+                continue
+
+            next_score = score * prob
+
+            picked_teams.add(team)
+            new_path = path + [(week_idx, team, opponent, prob)]
+
+            # Recurse
+            best_score = self.full_dfs(
+                weekly_candidates, week_idx + 1, picked_teams,
+                new_path, next_score, best_score,
+            )
+
+            picked_teams.remove(team)
+
+        return best_score
+
+
     def save_results(self, weeks, top_paths):
         # Calculate team pick percentages per week
         week_team_counts = {week: {} for week in weeks}
@@ -176,7 +235,7 @@ class NFLSurvivorPickerMonteCarlo:
         print(result.to_string(index=False))
         return result
 
-    def precompute_weekly_candidates(self, weeks):
+    def precompute_weekly_candidates(self, weeks, used_teams):
         candidates = {}
         for week in weeks:
             week_games = self.games_with_probs[self.games_with_probs["week"] == week]
@@ -189,11 +248,11 @@ class NFLSurvivorPickerMonteCarlo:
             else:
                 teams, probs, opponents = [], [], []
                 for _, row in week_games.iterrows():
-                    if row["home_win_prob"] > 0.6:
+                    if row["home_win_prob"] > 0.6 and row["home_team"] not in used_teams:
                         teams.append(row["home_team"])
                         probs.append(row["home_win_prob"])
                         opponents.append(row["away_team"])
-                    if row["away_win_prob"] > 0.6:
+                    if row["away_win_prob"] > 0.6 and row["away_team"] not in used_teams:
                         teams.append(row["away_team"])
                         probs.append(row["away_win_prob"])
                         opponents.append(row.home_team)

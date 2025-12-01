@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
-from nfl_win_scraper import NFLWinScraper
+from team_win_scraper import TeamWinScraper
 from win_predictor_adjustments_helper import (
     HOME_TEAM_ADJUSTMENTS,
     TEAMS_TO_AVOID_IN_WEEK_18,
@@ -9,7 +9,7 @@ from win_predictor_adjustments_helper import (
     apply_injury_adjustment,
     apply_bye_week_adjustment,
     apply_upset_riskiness_adjustment,
-    apply_momentum_adjustment
+    apply_momentum_adjustment,
 )
 
 SCHEDULE_CSV = "data/nfl_schedule.csv"
@@ -28,7 +28,7 @@ class NFLWinPredictor:
         should_scrape_current_wins,
     ):
         if should_scrape_current_wins:
-            NFLWinScraper.update_wins_column_in_csv(WINS_CSV)
+            TeamWinScraper.update_wins_column_in_csv(WINS_CSV)
 
         self.current_prediction_week = current_prediction_week
         self.scale = SCALE
@@ -108,14 +108,18 @@ class NFLWinPredictor:
             self.team_bye_week.get(away_team), week_number, away_score
         )
 
-        home_score, away_score = apply_upset_riskiness_adjustment(home_team, away_team, home_score, away_score)
+        home_score, away_score = apply_upset_riskiness_adjustment(
+            home_team, away_team, home_score, away_score
+        )
 
         # Momentum adjustment
         home_score = apply_momentum_adjustment(home_team, home_score)
         away_score = apply_momentum_adjustment(away_team, away_score)
 
         # Divisional underdog adjustment
-        home_score, away_score = apply_divisional_underdog_adjustment(home_team, away_team, home_score, away_score)
+        home_score, away_score = apply_divisional_underdog_adjustment(
+            home_team, away_team, home_score, away_score
+        )
 
         # Scaled logistic function
         diff = (home_score - away_score) / self.scale

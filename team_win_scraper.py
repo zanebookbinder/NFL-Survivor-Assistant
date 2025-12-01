@@ -3,13 +3,14 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
 
-class NFLWinScraper:
+
+class TeamWinScraper:
     def update_wins_column_in_csv(csv_file_path):
         """
         Update the 'wins' column in the specified CSV file with the latest
         win counts scraped from Pro Football Reference.
         """
-        team_wins = NFLWinScraper.get_team_wins_dict()
+        team_wins = TeamWinScraper.get_team_wins_dict()
         df = pd.read_csv(csv_file_path)
 
         # Update the 'wins' column
@@ -57,7 +58,9 @@ class NFLWinScraper:
                 ties_cell = row.find("td", {"data-stat": "ties"})
 
                 if team_cell and wins_cell:
-                    team_name = team_cell.get_text(strip=True).replace("*", "").replace("+", "")
+                    team_name = (
+                        team_cell.get_text(strip=True).replace("*", "").replace("+", "")
+                    )
                     wins = wins_cell.get_text(strip=True)
                     ties = ties_cell.get_text(strip=True)
                     if wins.isdigit():

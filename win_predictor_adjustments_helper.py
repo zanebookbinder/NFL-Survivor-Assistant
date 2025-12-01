@@ -7,6 +7,7 @@ ALREADY_CHOSEN_TEAMS = {
     10: ["DEN", 1.0, "LV"],
     11: ["BAL", 1.0, "CLE"],
     12: ["DET", 1.0, "NYG"],
+    13: ["LAC", 1.0, "LV"],
 }
 
 INJURY_ADJUSTMENTS = {
@@ -16,61 +17,61 @@ INJURY_ADJUSTMENTS = {
     "ARI": [[3, 100, -0.25]],  # James Conner
     "SF": [[3, 100, -0.5], [6, 100, -0.25]],  # Nick Bosa + Fred Warner
 
-    # DART CONCUSSION INCLUDED HERE
-    "NYG": [[4, 100, -0.75], [8, 100, -0.5], [10, 11, -1.5]],  # Nabers, Skattebo
+    "NYG": [[4, 100, -0.75], [8, 100, -0.5]],  # Nabers, Skattebo
     "MIA": [[4, 100, -0.5]],  # Tyreek Hill
     "TB": [[7, 100, -0.5]],  # Mike Evans
     "GB": [[9, 100, -0.25]],  # Tucker Kraft
     "TEN": [[11, 100, -0.25]],  # Calvin Ridley
 
     # Temporary injuries (UPDATE THE END WEEKS)
-    "WAS": [[10, 13, -2]],  # Jayen Daniels
-    "PIT": [[11, 13, -2.0]],  # Aaron Rodgers
+    "MIN": [[13,14, -0.25]],  # Aaron Jones
+    "WAS": [[10, 14, -2]],  # Jayen Daniels
+    "PIT": [[11, 14, -2.0]],  # Aaron Rodgers
 }
 
 MOMENTUM_ADJUSTMENTS = {
     "NE": 1,
     "DEN": 1,
-    "LAR": 1,
     "CHI": 1,
+    "SEA": 1,
+    "JAX": 1,
 
-
-    "SEA": 0.75,
-    "JAX": 0.75,
-    "SF": 0.5,
-    "BAL": 0.75,
-    "DAL": 0.5,
-    "KC": 0.5,
+    "SF": 0.75,
+    "CIN": 0.75,
+    "DAL": 0.75,
+    "LAR": 0.5,
 
     "CLE": 0.25,
 
-    "NO": -0.5,
-    "NYG": -0.5,
+    "BAL": 0,
 
-    "CIN": -0.75,
-    "NYJ": -0.75,
-    "LV": 1,
-    "TEN": 1,
-    "WAS": 1,
+    "NYJ": -0.5,
+    "KC": -0.5,
+    "NO": -0.75,
+    "NYG": -0.75,
+
+    "LV": -1,
+    "TEN": -1,
+    "WAS": -1,
 }
 
 UPSET_RISKINESS_ADJUSTMENTS = {
     "DAL": 1,
     "CAR": 1,
     "HOU": 1,
+    "CIN": 1,
     "ATL": 0.75,
-    "CIN": 0.5,
 
-    "CLE": 0,
     "NO": 0,
     "NYG": 0,
-
-    "NYJ": -0.5,
-    "LV": -0.75,
-    "TEN": -0.75,
+    
+    "CLE": -0.75,
+    "NYJ": -0.75,
+    "LV": -1,
+    "TEN": -1,
 }
 
-TEAMS_TO_AVOID_IN_WEEK_18 = ["DEN", "PHI", "IND", "NE", "LAR"]
+TEAMS_TO_AVOID_IN_WEEK_18 = ["DEN", "NE", "LAR"]
 
 # STATIC - SHOULD NOT CHANGE
 HOME_TEAM_ADJUSTMENTS = {

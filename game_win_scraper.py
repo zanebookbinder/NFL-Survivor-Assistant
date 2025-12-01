@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 
-class Win_Scraper:
+class GameWinScraper:
     def __init__(self, base_url):
         self.base_url = base_url
         self.all_games = None
@@ -76,7 +76,7 @@ class Win_Scraper:
         return self.all_games
 
 base_url = "https://www.pro-football-reference.com/years/2025/week_"
-scraper = Win_Scraper(base_url)
+scraper = GameWinScraper(base_url)
 
 for week in range(12, 14):
     scraper.get_games_df(week)
