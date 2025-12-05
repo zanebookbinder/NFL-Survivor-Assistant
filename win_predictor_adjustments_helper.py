@@ -13,7 +13,6 @@ ALREADY_CHOSEN_TEAMS = {
 INJURY_ADJUSTMENTS = {
     # Season-long injuries
 
-    "CIN": [[2, 100, -3.5]],  # Joe Burrow (9.5 projected wins to 6)
     "ARI": [[3, 100, -0.25]],  # James Conner
     "SF": [[3, 100, -0.5], [6, 100, -0.25]],  # Nick Bosa + Fred Warner
 

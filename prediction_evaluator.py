@@ -1,5 +1,10 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 import os
+from constants import (
+	SCHEDULE_WITH_PROBABILITIES_PATH,
+    PROJECTED_WINS_CSV_PATH)
 
 class PredictionEvaluator:
     def __init__(self, results_path, probabilities_path, appreviation_path, threshold=0.60):
@@ -21,7 +26,7 @@ class PredictionEvaluator:
         """Convert full name to abbreviation if possible."""
         return self.name_to_abbrev.get(name, name)
 
-    def evaluate_week(self, week):
+    def evaluate_week(self, week, verbose):
         """Return (correct_predictions, total_considered) for a given week."""
         survivor_assistant_predictions = self.probs
         if os.path.exists("data/prediction_history/week_{}.csv".format(week)):
@@ -33,7 +38,8 @@ class PredictionEvaluator:
         correct = 0
         total = 0
 
-        print('Week ', week)
+        if verbose:
+            print('Week ', week)
         for _, game in week_probs.iterrows():
             home = game["home_team"]
             away = game["away_team"]
@@ -61,14 +67,16 @@ class PredictionEvaluator:
 
             total += 1
             if predicted_winner == actual_winner:
-                print(f"\t Correct prediction: {predicted_winner} over {predicted_loser}")
+                if verbose:
+                    print(f"\t Correct prediction: {predicted_winner} over {predicted_loser}")
                 correct += 1
             else:
-                print(f"\t Bad prediction: {predicted_winner} over {predicted_loser}, actual winner: {actual_winner}")
+                if verbose:
+                    print(f"\t Bad prediction: {predicted_winner} over {predicted_loser}, actual winner: {actual_winner}")
 
         return correct, total
 
-    def evaluate_season(self):
+    def evaluate_season(self, verbose):
         """Return accuracy by week and overall."""
         weeks = sorted(self.results["week"].unique())
 
@@ -77,7 +85,7 @@ class PredictionEvaluator:
         total_considered = 0
 
         for wk in weeks:
-            correct, considered = self.evaluate_week(wk)
+            correct, considered = self.evaluate_week(wk, verbose)
             summary[wk] = {
                 "correct": correct,
                 "considered": considered,
@@ -90,17 +98,55 @@ class PredictionEvaluator:
             total_correct / total_considered if total_considered else None
         )
 
-        return summary, overall_accuracy
+        return summary, overall_accuracy, total_considered
+    
+    def plot_performance_by_threshold(self):
+        thresholds = np.arange(0.5, 0.91, 0.05)
+
+        prediction_counts = []
+        win_percentages = []
+
+        for t in thresholds:
+            
+            self.threshold = t
+            _, overall_accuracy, games_considered = self.evaluate_season(verbose=False)
+            
+            prediction_counts.append(games_considered)
+            win_percentages.append(overall_accuracy)
+
+        _, ax1 = plt.subplots(figsize=(10, 6))
+
+        # Prediction count line
+        ax1.plot(thresholds, prediction_counts, label="Prediction Count")
+        ax1.set_xlabel("Threshold")
+        ax1.set_ylabel("Prediction Count")
+
+        # Second y-axis for accuracy
+        ax2 = ax1.twinx()
+        ax2.plot(thresholds, win_percentages, label="Win %", linestyle='--')
+        ax2.set_ylabel("Win Percentage")
+
+        plt.title("Prediction Count and Win % by Threshold")
+        plt.show()
 
 
-evaluator = PredictionEvaluator("data/all_game_results_df.csv", 
-                                "data/nfl_schedule_with_probs.csv", 
-                                "data/nfl_projected_wins.csv", 
-                                threshold=0.5)
-week_summary, overall_accuracy = evaluator.evaluate_season()
+evaluator = PredictionEvaluator(
+                "data/all_game_results_df.csv",
+                SCHEDULE_WITH_PROBABILITIES_PATH,
+                PROJECTED_WINS_CSV_PATH,
+                threshold=0.5
+            )
 
-print("Week-by-week record:")
-for wk, data in week_summary.items():
-    print(f"Week {wk}: {data['correct']} correct out of {data['considered']}")
+evaluator.plot_performance_by_threshold()
 
-print("\nOverall accuracy:", overall_accuracy)
+# evaluator = PredictionEvaluator("data/all_game_results_df.csv", 
+#                                 SCHEDULE_WITH_PROBABILITIES_PATH, 
+#                                 PROJECTED_WINS_CSV_PATH, 
+#                                 threshold=0.5)
+# week_summary, overall_accuracy = evaluator.evaluate_season()
+
+# print("Week-by-week record:")
+# for wk, data in week_summary.items():
+#     print(f"Week {wk}: {data['correct']} correct out of {data['considered']}")
+
+# print("\nOverall accuracy:", overall_accuracy)

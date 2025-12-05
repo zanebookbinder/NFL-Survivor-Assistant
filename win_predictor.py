@@ -11,11 +11,13 @@ from win_predictor_adjustments_helper import (
     apply_upset_riskiness_adjustment,
     apply_momentum_adjustment,
 )
+from constants import (
+    SCHEDULE_CSV_PATH,
+    SCHEDULE_WITH_PROBABILITIES_PATH,
+    FULL_CALC_CSV_PATH,
+    PROJECTED_WINS_CSV_PATH,
+)
 
-SCHEDULE_CSV = "data/nfl_schedule.csv"
-SCHEDULE_WITH_PROBABILITIES_PATH = "data/nfl_schedule_with_probs.csv"
-FULL_CALC_PATH_CSV = "data/nfl_schedule_with_probs_fullcalcs.csv"
-WINS_CSV = "data/nfl_projected_wins.csv"
 SCALE = 3.5
 HOME_FIELD_ADVANTAGE = 0.5
 PREDICTION_DECAY_HALFLIFE = 25
@@ -28,21 +30,21 @@ class NFLWinPredictor:
         should_scrape_current_wins,
     ):
         if should_scrape_current_wins:
-            TeamWinScraper.update_wins_column_in_csv(WINS_CSV)
+            TeamWinScraper.update_wins_column_in_csv(PROJECTED_WINS_CSV_PATH)
 
         self.current_prediction_week = current_prediction_week
         self.scale = SCALE
         self.home_field_advantage = HOME_FIELD_ADVANTAGE
         self.prediction_decay_halflife = PREDICTION_DECAY_HALFLIFE
-        self.data = pd.read_csv(WINS_CSV)
-        self.schedule = pd.read_csv(SCHEDULE_CSV)
+        self.data = pd.read_csv(PROJECTED_WINS_CSV_PATH)
+        self.schedule = pd.read_csv(SCHEDULE_CSV_PATH)
         self.projected_wins = dict(
             zip(self.data["abbreviation"], self.data["projected_wins"])
         )
         self.current_wins = dict(
             zip(self.data["abbreviation"], self.data["current_wins"])
         )
-        self.team_bye_week = self.create_bye_week_map()
+        self.team_bye_week = self.create_bye_week_map(SCHEDULE_CSV_PATH)
         self.team_wins = self.calculate_team_wins_dict(current_prediction_week)
 
     def calculate_team_wins_dict(self, current_prediction_week):
@@ -61,7 +63,7 @@ class NFLWinPredictor:
             )
         return team_wins
 
-    def create_bye_week_map(self, schedule_csv="data/nfl_schedule.csv"):
+    def create_bye_week_map(self, schedule_csv):
         schedule = pd.read_csv(schedule_csv)
         teams = set(schedule["home_team"]).union(set(schedule["away_team"]))
         weeks = set(schedule["week"])
@@ -173,7 +175,10 @@ class NFLWinPredictor:
     def add_win_probabilities_to_csv(self):
         rows = []
         calc_rows = []
-        schedule = pd.read_csv(SCHEDULE_CSV)
+
+        schedule = pd.read_csv(SCHEDULE_CSV_PATH)
+        schedule = schedule.loc[schedule["week"] >= self.current_prediction_week]
+
         for _, row in schedule.iterrows():
             week = row["week"]
             home = row["home_team"]
@@ -187,12 +192,29 @@ class NFLWinPredictor:
             rows.append(result_dict)
             calc_rows.append(result_dict_with_cals)
 
-        result = pd.DataFrame(rows)
-        calc_result = pd.DataFrame(calc_rows)
+        # Combine the existing probabilities from previous weeks with the new ones
+        # looking forward
+        result = pd.DataFrame(rows)  # new data
+        old_probs = pd.read_csv(SCHEDULE_WITH_PROBABILITIES_PATH)
 
-        if SCHEDULE_WITH_PROBABILITIES_PATH:
-            result.to_csv(SCHEDULE_WITH_PROBABILITIES_PATH, index=False)
-        calc_result.to_csv(FULL_CALC_PATH_CSV, index=False)
+        result = result.loc[result["week"] >= self.current_prediction_week]
+        old_probs = old_probs.loc[old_probs["week"] < self.current_prediction_week]
+        final_result = pd.concat([old_probs, result], ignore_index=True)
+        final_result.to_csv(SCHEDULE_WITH_PROBABILITIES_PATH, index=False)
+
+        if FULL_CALC_CSV_PATH:
+            # Combine the existing probabilities from previous weeks with the new ones
+            # looking forward
+            calc_result = pd.DataFrame(calc_rows)
+            old_calcs = pd.read_csv(FULL_CALC_CSV_PATH)
+
+            calc_result = calc_result.loc[
+                calc_result["week"] >= self.current_prediction_week
+            ]
+            old_calcs = old_calcs.loc[old_calcs["week"] < self.current_prediction_week]
+            final_calc_result = pd.concat([old_calcs, calc_result], ignore_index=True)
+            final_calc_result.to_csv(FULL_CALC_CSV_PATH, index=False)
+
         return result
 
 

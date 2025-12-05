@@ -6,9 +6,6 @@ from win_predictor import NFLWinPredictor
 from datetime import datetime
 from win_predictor_adjustments_helper import ALREADY_CHOSEN_TEAMS
 
-SCHEDULE_CSV_PATH = "data/nfl_schedule.csv"
-PROJECTED_WIN_CSV_PATH = "data/nfl_projected_wins.csv"
-
 CHOOSE_THIS_WEEK = {
     # 6: ["ARI", 0.7119, "TEN"]
 }
